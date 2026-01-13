@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'accounts',  # Custom app for users
     'products',  # Custom app for products
     'offers',  # Custom app for offers
+    'companys',  # Custom app for companies
 ]
 INSTALLED_APPS += ['scripts']
 

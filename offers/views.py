@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+
+from .models import Companys
 from .models import Offer, OfferItem
 from products.models import Product
 from django.contrib.auth.models import User
@@ -15,7 +17,7 @@ def offer_list(request):
     View to list all offers.
     Supports HTML and JSON responses.
     """
-    offers = Offer.objects.all()
+    offers = Offer.objects.select_related('customer', 'companys').all() 
 
     # JSON response
     if request.headers.get('Content-Type') == 'application/json':
@@ -23,6 +25,7 @@ def offer_list(request):
             {
                 "id": offer.id,
                 "customer": offer.customer.username,
+                "company": offer.companys.name,
                 "date": offer.date,
                 "sub_total": float(offer.sub_total),
                 "tax": float(offer.tax),
@@ -37,7 +40,6 @@ def offer_list(request):
                   'offers/offer_list.html',
                   {'offers': offers})
 
-
 @login_required
 @require_http_methods(["GET"])
 def offer_detail(request, pk):
@@ -45,14 +47,16 @@ def offer_detail(request, pk):
     View to display details of a single offer.
     Supports HTML and JSON responses.
     """
-    offer = get_object_or_404(Offer, pk=pk)
-    items = OfferItem.objects.filter(offer=offer)
+    # ISPRAVNO: Offer.objects.select_related()
+    offer = get_object_or_404(Offer.objects.select_related('customer', 'companys'), pk=pk)
+    items = OfferItem.objects.filter(offer=offer).select_related('product')
 
     # JSON response
     if request.headers.get('Content-Type') == 'application/json':
         offer_data = {
             "id": offer.id,
             "customer": offer.customer.username,
+            "company": offer.companys.name,
             "date": offer.date,
             "sub_total": float(offer.sub_total),
             "tax": float(offer.tax),
@@ -71,7 +75,6 @@ def offer_detail(request, pk):
     # HTML response
     return render(request, 'offers/offer_detail.html', {'offer': offer, 'items': items})
 
-
 @login_required
 @require_http_methods(["GET", "POST"])
 def offer_create(request):
@@ -79,6 +82,7 @@ def offer_create(request):
     View to create a new offer.
     """
     if request.method == 'POST':
+        companys_id = request.POST.get('companys') 
         customer_id = request.POST.get('customer')
         date = request.POST.get('date')
         product_ids = request.POST.getlist('items')
@@ -90,7 +94,16 @@ def offer_create(request):
         total = sub_total + tax
 
         customer = get_object_or_404(User, id=customer_id)
-        offer = Offer.objects.create(customer=customer, date=date, sub_total=sub_total, tax=tax, total=total)
+        companys = get_object_or_404(Companys, id=companys_id)  
+
+        offer = Offer.objects.create(
+            customer=customer,
+            companys=companys,  
+            date=date,
+            sub_total=sub_total,
+            tax=tax,
+            total=total
+        )
 
         for product in products:
             OfferItem.objects.create(offer=offer, product=product, quantity=1)
@@ -98,13 +111,15 @@ def offer_create(request):
         return redirect('offer_list')
 
     # Render the create form template
+    
     customers = User.objects.all()
     products = Product.objects.all()
+    companys = Companys.objects.all()
     return render(request,
                   'offers/offer_create_form.html',
                   {'customers': customers,
-                   'products': products})
-
+                   'products': products,
+                   'companys': companys})
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -118,6 +133,7 @@ def offer_edit(request, pk):
     products = Product.objects.all()
 
     if request.method == 'POST':
+        companys = request.POST.get('companys')
         customer_id = request.POST.get('customer')
         date = request.POST.get('date')
         selected_product_ids = request.POST.getlist('items')
@@ -130,6 +146,7 @@ def offer_edit(request, pk):
 
         # Update offer details
         offer.customer = get_object_or_404(User, id=customer_id)
+        offer.companys = get_object_or_404(Companys, id=companys)
         offer.date = date
         offer.sub_total = sub_total
         offer.tax = tax
@@ -153,5 +170,6 @@ def offer_edit(request, pk):
             'customers': customers,
             'products': products,
             'selected_product_ids': list(selected_product_ids),
+            'companys': Companys.objects.all(),
         },
     )

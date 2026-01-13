@@ -22,6 +22,7 @@
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Customer</th>
+                        <th scope="col">Company</th>
                         <th scope="col">Date</th>
                         <th scope="col">Total</th>
                         <th scope="col">Actions</th>
@@ -32,6 +33,7 @@
                     <tr>
                         <td><a href="{% url 'offer_detail' offer.id %}" class="text-decoration-none">#{{ offer.id }}</a></td>
                         <td>{{ offer.customer.username }}</td>
+                        <td>{{ offer.companys }}</td>
                         <td>{{ offer.date }}</td>
                         <td>${{ offer.total }}</td>
                         <td>

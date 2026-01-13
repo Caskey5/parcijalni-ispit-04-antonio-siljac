@@ -34,6 +34,18 @@
                             </select>
                         </div>
 
+                        <!-- Company -->
+                        <div class="mb-3">
+                            <label for="companys" class="form-label">Company</label>
+                            <select name="companys" id="companys" class="form-select">
+                                {% for company in companys %}
+                                <option value="{{ company.id }}" {% if company.id == offer.companys.id %}selected{% endif %}>
+                                    {{ company.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
                         <!-- Date -->
                         <div class="mb-3">
                             <label for="date" class="form-label">Date</label>
