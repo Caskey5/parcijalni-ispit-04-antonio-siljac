@@ -1,0 +1,5 @@
+Antonio, sve pohvale na trudu i pokušaju. Imate neke propuste kao što je recimo da su views public - trebali ste dodati mehanizam za provjeru je li
+korisnik autheniticiran, ali ste zato u forme dodali opciju kontrole elemenata pomoću widgets.
+
+Ono što se vidi da ste ovo radili Vi, možda uz pomoći AI, ali ste rezultate prepisali ili prepravili tako da su na kraju Vaši i to je odlično i ono najvažnije.
+Samo nastavite tako i neće biti problema. Dakle, rješenje je jako dobro, a zato jer je Vaše je u stvari odlično.
